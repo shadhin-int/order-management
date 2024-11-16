@@ -56,3 +56,11 @@ func Login(c *gin.Context) {
 		RefreshToken: "refresh_" + tokenString,
 	})
 }
+
+func Logout(c *gin.Context) {
+	c.JSON(http.StatusOK, models.APIResponse{
+		Message: "Logout successful",
+		Type:    "success",
+		Code:    200,
+	})
+}

@@ -5,6 +5,7 @@ import (
 	"log"
 	"order-management/config"
 	"order-management/handlers"
+	"order-management/middleware"
 )
 
 func init() {
@@ -26,6 +27,7 @@ func main() {
 	api := router.Group("/api/v1")
 	{
 		api.POST("/login", handlers.Login)
+		api.POST("logout", middleware.AuthRequired(), handlers.Logout)
 
 	}
 
