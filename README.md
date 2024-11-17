@@ -46,7 +46,19 @@ Copy the `.env.example` file to `.env` and adjust the environment variables acco
 
     cp .env.example .env
 
-### 3. Install Dependencies
+### 3. Set Up Database
+create a database in PostgreSQL and update the database configuration in the `.env` file.
+
+```bash
+psql -U postgres
+```
+
+```sql
+create database order_management;
+GRANT ALL PRIVILEGES ON DATABASE order_management TO postgres;
+````
+
+### 4. Install Dependencies
 
 Make sure all Go dependencies are installed by running:
 
@@ -56,12 +68,11 @@ go mod tidy
 
 ## Run the Project
 
-#### Start the server
-
+#### Run the project with the following command:
 ```bash
-go run main.go
+go build && go run main.go
 ```
-The server will start on `localhost:8080`.
+The server will start on `localhost:8080`
 
 > **_NOTE:_**  When run the project first time, it will automatically create the required tables in the database.
 
