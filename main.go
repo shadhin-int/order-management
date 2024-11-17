@@ -10,6 +10,7 @@ import (
 
 func init() {
 	config.Init()
+	config.InitDB()
 
 	if config.AppConfig.Env != "development" {
 		gin.SetMode(gin.ReleaseMode)
@@ -28,6 +29,12 @@ func main() {
 	{
 		api.POST("/login", handlers.Login)
 		api.POST("logout", middleware.AuthRequired(), handlers.Logout)
+
+		orders := api.Group("/orders")
+		orders.Use(middleware.AuthRequired())
+		{
+			orders.POST("", handlers.CreateOrder)
+		}
 
 	}
 
