@@ -323,4 +323,12 @@ You can use Postman or `curl` to test the API endpoints.
         }
         ```
     
- 
+ ### Further Improvements
+- Though for user authentication used test data, it should be implemented with a proper authentication system.
+- Currently only one user is available in the system. It should be implemented with multiple users.
+- For order maintain by a single table, it should be implemented with multiple tables with proper relationships.
+- For the order status, it should be implemented with a separate table.
+- For the city, zone, and area, it should be implemented with a separate table.
+- Need to implement blacklisting the token.
+- Need to implement the refresh token.
+- For logging, it should be implemented with a proper logging system.
