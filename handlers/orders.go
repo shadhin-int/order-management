@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"errors"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"order-management/config"
 	"order-management/models"
 	"order-management/utils"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -93,5 +96,82 @@ func CreateOrder(c *gin.Context) {
 			"order_status":      orderObj.OrderStatus,
 			"delivery_fee":      deliveryFee,
 		},
+	})
+}
+
+func GetAllOrders(c *gin.Context) {
+	orderStatus := c.DefaultQuery("order_status", models.OrderStatusPending)
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+
+	if page < 1 {
+		page = 1
+	}
+
+	if limit < 1 {
+		limit = 10
+	}
+
+	offset := (page - 1) * limit
+
+	var orders []models.Order
+	var total int64
+
+	query := config.DB.Model(&models.Order{}).Where("LOWER(order_status::text) = LOWER(?)", orderStatus)
+	query.Count(&total)
+
+	err := query.Offset(offset).Limit(limit).Order("order_created_at DESC").Find(&orders).Error
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusInternalServerError, models.APIResponse{
+			Message: "Failed to fetch orders",
+			Type:    "error",
+			Code:    500,
+		})
+		return
+	}
+
+	lastPage := (int(total) + limit - 1) / limit
+	totalInPage := len(orders)
+	var orderData []map[string]interface{}
+
+	for _, order := range orders {
+		orderData = append(orderData, map[string]interface{}{
+			"order_consignment_id": order.OrderConsignmentID,
+			"order_created_at":     order.OrderCreatedAt.Format("2006-01-02 15:04:05"),
+			"order_description":    order.ItemDescription,
+			"merchant_order_id":    order.MerchantOrderID,
+			"recipient_name":       order.RecipientName,
+			"recipient_address":    order.RecipientAddress,
+			"recipient_phone":      order.RecipientPhone,
+			"order_amount":         order.AmountToCollect,
+			"total_fee":            order.TotalFee,
+			"instruction":          order.SpecialInstruction,
+			"order_type_id":        order.OrderTypeID,
+			"cod_fee":              order.CODFee,
+			"promo_discount":       order.PromoDiscount,
+			"discount":             order.Discount,
+			"delivery_fee":         order.DeliveryFee,
+			"order_status":         order.OrderStatus,
+			"order_type":           order.OrderType,
+			"item_type":            utils.GetItemType(order.ItemType),
+		})
+	}
+
+	paginatedData := models.PaginatedResponse{
+		Data:        orderData,
+		Total:       total,
+		CurrentPage: page,
+		PerPage:     limit,
+		TotalInPage: totalInPage,
+		LastPage:    lastPage,
+	}
+
+	c.JSON(http.StatusOK, models.APIResponse{
+		Message: "Orders fetched successfully",
+		Type:    "success",
+		Code:    200,
+		Data:    paginatedData,
 	})
 }

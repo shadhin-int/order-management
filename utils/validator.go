@@ -39,3 +39,15 @@ func RandomString(n int) string {
 	}
 	return string(b)
 }
+
+func GetItemType(itemType int) string {
+	itemTypes := map[int]string{
+		1: "Document",
+		2: "Parcel",
+	}
+
+	if itemName, ok := itemTypes[itemType]; ok {
+		return itemName
+	}
+	return "Unknown"
+}

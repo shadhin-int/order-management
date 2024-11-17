@@ -26,6 +26,15 @@ type APIResponse struct {
 	Errors  interface{} `json:"errors,omitempty"`
 }
 
+type PaginatedResponse struct {
+	Data        interface{} `json:"data"`
+	Total       int64       `json:"total"`
+	CurrentPage int         `json:"current_page"`
+	PerPage     int         `json:"per_page"`
+	TotalInPage int         `json:"total_in_page"`
+	LastPage    int         `json:"last_page"`
+}
+
 const (
 	OrderStatusPending   = "Pending"
 	OrderStatusDelivered = "Delivered"
@@ -83,9 +92,6 @@ func ValidateOrderStatus(status string) error {
 }
 
 func (o *Order) BeforeSave(tx *gorm.DB) (err error) {
-	//if o.StoreID == 0 {
-	//	return errors.New("store_id is required")
-	//}
 	if err := ValidateOrderStatus(o.OrderStatus); err != nil {
 		return err
 	}

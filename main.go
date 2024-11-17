@@ -28,12 +28,13 @@ func main() {
 	api := router.Group("/api/v1")
 	{
 		api.POST("/login", handlers.Login)
-		api.POST("logout", middleware.AuthRequired(), handlers.Logout)
+		api.POST("/logout", middleware.AuthRequired(), handlers.Logout)
 
 		orders := api.Group("/orders")
 		orders.Use(middleware.AuthRequired())
 		{
 			orders.POST("", handlers.CreateOrder)
+			orders.GET("/all", handlers.GetAllOrders)
 		}
 
 	}
