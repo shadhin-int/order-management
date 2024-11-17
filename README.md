@@ -1,6 +1,6 @@
 # Order Management System
 
-This is an Order Management System built with Go, Gin, and GORM.
+This is an Order Management System built with Go, Gin, GORM, Postgres. It provides APIs to create, get, and cancel orders with a test user authentication system.
 
 
 ### Project Structure
