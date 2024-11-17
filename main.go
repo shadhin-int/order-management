@@ -35,6 +35,7 @@ func main() {
 		{
 			orders.POST("", handlers.CreateOrder)
 			orders.GET("/all", handlers.GetAllOrders)
+			orders.PUT("/:consignment_id/cancel", handlers.CancelOrder)
 		}
 
 	}

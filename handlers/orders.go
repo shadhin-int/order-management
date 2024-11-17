@@ -175,3 +175,64 @@ func GetAllOrders(c *gin.Context) {
 		Data:    paginatedData,
 	})
 }
+
+func CancelOrder(c *gin.Context) {
+	consignmentID := c.Param("consignment_id")
+
+	if consignmentID == "" {
+		c.JSON(http.StatusUnprocessableEntity, models.APIResponse{
+			Message: "Consignment ID is required",
+			Type:    "error",
+			Code:    422,
+		})
+		return
+	}
+
+	var order models.Order
+	err := config.DB.Where("order_consignment_id = ?", consignmentID).First(&order).Error
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, models.APIResponse{
+			Message: "Order not found",
+			Type:    "error",
+			Code:    404,
+		})
+		return
+	}
+
+	if order.OrderStatus == models.OrderStatusCancelled {
+		c.JSON(http.StatusUnprocessableEntity, models.APIResponse{
+			Message: "Order already cancelled",
+			Type:    "error",
+			Code:    422,
+		})
+		return
+	}
+
+	if order.OrderStatus != models.OrderStatusPending {
+		c.JSON(http.StatusBadRequest, models.APIResponse{
+			Message: "Please contact cx to cancel the order",
+			Type:    "error",
+			Code:    400,
+		})
+		return
+	}
+
+	order.OrderStatus = models.OrderStatusCancelled
+	err = config.DB.Save(&order).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.APIResponse{
+			Message: "Failed to cancel order",
+			Type:    "error",
+			Code:    500,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.APIResponse{
+		Message: "Order cancelled successfully",
+		Type:    "success",
+		Code:    200,
+	})
+}
